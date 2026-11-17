@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Tests of the generated Solidity verifier in an EVM with the EIP-2537 precompiles",
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test \"test/*.test.ts\""
   },
   "devDependencies": {
     "@ethereumjs/common": "10.1.3",
