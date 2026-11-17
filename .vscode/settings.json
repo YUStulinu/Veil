@@ -1,0 +1,5 @@
+{
+  "rust-analyzer.linkedProjects": ["prover/Cargo.toml"],
+  "files.exclude": { "**/target": true, "**/node_modules": true, "lang/build": true },
+  "editor.formatOnSave": false
+}

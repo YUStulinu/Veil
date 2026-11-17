@@ -1,0 +1,20 @@
+[package]
+name = "veil"
+version = "0.1.0"
+edition = "2021"
+description = "PLONK + KZG over BLS12-381, written from scratch"
+license = "MIT"
+
+[[bin]]
+name = "veil"
+path = "src/main.rs"
+
+[features]
+# CUDA kernels for MSM and NTT (needs nvcc)
+cuda = []
+
+[profile.release]
+debug = 1
+
+[profile.test]
+opt-level = 3

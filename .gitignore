@@ -1,0 +1,10 @@
+# build outputs
+prover/target/
+lang/build/
+build/
+web/node_modules/
+web/dist/
+evm/node_modules/
+# downloaded test data (scripts/fetch_vectors.py)
+data/
+__pycache__/

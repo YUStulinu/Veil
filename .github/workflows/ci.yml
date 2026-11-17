@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  prover:
+    name: Prover (Rust) - fields, curves, pairing, KZG, PLONK, official vectors
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Official test vectors (BLS12-381, EIP-4844 KZG, ceremony setup)
+        run: python3 scripts/fetch_vectors.py
+      - name: Tests
+        env:
+          VEIL_REQUIRE_VECTORS: "1"
+        run: cd prover && cargo test --release
+
+  compiler:
+    name: Circuit compiler (Haskell)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: haskell-actions/setup@v2
+        with:
+          ghc-version: "9.10"
+      - name: Build and test
+        run: |
+          cd lang
+          mkdir -p build
+          ghc -O1 -isrc -iapp -outputdir build -o build/veilc app/Main.hs
+          ghc -O1 -isrc -itest -outputdir build/test -o build/spec test/Spec.hs
+          ./build/spec
+
+  sudoku:
+    name: Sudoku end to end - Solidity verifier (EVM) and browser (Wasm, TypeScript)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: haskell-actions/setup@v2
+        with:
+          ghc-version: "9.10"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Ceremony setup
+        run: python3 scripts/fetch_vectors.py
+      - name: Compile, prove, verify, export the Solidity verifier and the Wasm prover
+        run: scripts/sudoku.sh
+      - name: Solidity verifier in the EVM
+        run: cd evm && npm ci && npm test
+      - name: TypeScript verifier and the Wasm prover
+        run: cd web && npm ci && npm test && npm run build

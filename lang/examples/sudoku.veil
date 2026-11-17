@@ -1,0 +1,31 @@
+// Sudoku: I know a solution of this puzzle.
+// The puzzle is public (0 = empty cell), the solution stays private.
+
+// x is one of lo..hi: (x - lo)(x - lo - 1)...(x - hi) = 0
+def in_range(x, lo, hi) {
+  let p = 1;
+  for k in lo..hi + 1 {
+    p = p * (x - k);
+  }
+  assert p == 0;
+}
+
+// 2^(x-1) for a digit x: the polynomial through (1, 1), (2, 2), ..., (9, 256).
+// Nine digits are all different exactly when their bits sum to 511.
+def bit(x) {
+  return interp(x, 1, [1, 2, 4, 8, 16, 32, 64, 128, 256]);
+}
+
+circuit sudoku(public puzzle[81], private solution[81]) {
+  for i in 0..81 {
+    in_range(solution[i], 1, 9);
+    // a given digit is kept: the cell is empty or the digits agree
+    assert puzzle[i] * (solution[i] - puzzle[i]) == 0;
+  }
+  let bits = [bit(solution[i]) for i in 0..81];
+  for k in 0..9 {
+    assert sum([bits[9 * k + j] for j in 0..9]) == 511;                                // row k
+    assert sum([bits[k + 9 * j] for j in 0..9]) == 511;                                // column k
+    assert sum([bits[27 * (k / 3) + 3 * (k % 3) + 9 * (j / 3) + j % 3] for j in 0..9]) == 511;  // box k
+  }
+}
